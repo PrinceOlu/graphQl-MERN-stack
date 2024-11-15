@@ -1,0 +1,9 @@
+https://www.youtube.com/watch?v=BcLNfwF04Kw
+
+1)  npm install express graphql-http graphql mongoose cors --save
+2) npm i  nodemon dotenv
+3) npm install express-graphql
+
+NB:
+To test your endpoint using something similar to POSTMAN
+http://localhost:5000/graphql

@@ -27,10 +27,11 @@ const {
   const ProjectStatusEnum = new GraphQLEnumType({
     name: "ProjectStatus",
     values: {
-      NOT_STARTED: { value: "Not Started" },
+      NEW: { value: "Not Started" },
       IN_PROGRESS: { value: "In Progress" },
       COMPLETED: { value: "Completed" },
     },
+    defaultValue: "Not Started"
   });
   
   // Project Type
@@ -87,6 +88,7 @@ const {
   const Mutation = new GraphQLObjectType({
     name: "Mutation",
     fields: {
+      // add Client
       addClient: {
         type: ClientType,
         args: {
@@ -107,6 +109,17 @@ const {
           }
         },
       },
+      // Delete Client
+        deleteClient:{
+          type: ClientType,
+          args:{
+            id: {type : GraphQLNonNull(GraphQLID)},
+          },
+          resolve(parent, args){
+            return Client.findByIdAndDelete(args.id)
+          }
+        },
+      // add Project
       addProject: {
         type: ProjectType,
         args: {
@@ -129,6 +142,40 @@ const {
           }
         },
       },
+
+      // delete Project
+      deleteProject: {
+        type: ProjectType,
+        args:{
+          id: {type : GraphQLNonNull(GraphQLID)},
+        },
+        resolve(parent, args){
+          return Project.findByIdAndDelete(args.id)
+        }
+      },
+      // Update Project
+      UpdateProject:{
+          type: ProjectType,
+          args:{
+            id: {type : GraphQLNonNull(GraphQLID)},
+            name: {type : GraphQLString},
+            description: {type : GraphQLString},
+            status: { type: GraphQLNonNull(ProjectStatusEnum) },
+          },
+          resolve(parent, args){
+            return Project.findByIdAndUpdate(
+              args.id,
+              {
+                $set:{
+                  name: args.name,
+                  description: args.description,
+                  status: args.status
+                },
+              },
+              {new: true}
+            )
+          }
+      }
     },
   });
   

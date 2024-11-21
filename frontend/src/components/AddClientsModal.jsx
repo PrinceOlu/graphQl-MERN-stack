@@ -1,29 +1,44 @@
 import { useMutation } from "@apollo/client";
 import { useState } from "react";
 import { FaUser } from "react-icons/fa";
+import { ADD_CLIENT } from "../mutations/clientMutations";
+import { GET_CLIENTS } from "../queries/clientQueries";
 
 function AddClientsModal() {
-    const [name, setName] = useState("")
-    const [email, setEmail] = useState("")
-    const [phone, setPhone] = useState("")
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
 
-const handleNameChange = (e) => {
-    setName(e.target.value)
-}
-const handleEmailChange = (e) => {
-    setEmail(e.target.value)
-}
-const handlePhoneChange = (e) => {
-    setPhone(e.target.value)
-}
+  const [addClient] = useMutation(ADD_CLIENT, {
+    variables: { name, email, phone },
+    // Update the cache after adding a client
+    update(cache, { data: { addClient } }) {
+      const { clients } = cache.readQuery({ query: GET_CLIENTS });
+      cache.writeQuery({
+        query: GET_CLIENTS,
+        data: { clients: [...clients, addClient] },
+      });
+    },
+  });
 
-const handleSubmit = (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     if (!name || !email || !phone) {
-        alert("Please fill in all fields.");
-        return;
-      }
-}
+      alert("Please fill in all fields.");
+      return;
+    }
+
+    // Call the mutation
+    addClient()
+      .then(() => {
+        // Clear form fields on success
+        setName("");
+        setEmail("");
+        setPhone("");
+      })
+      .catch((err) => console.error("Error adding client:", err));
+  };
+
   return (
     <>
       {/* Button trigger modal */}
@@ -33,7 +48,7 @@ const handleSubmit = (e) => {
         data-bs-toggle="modal"
         data-bs-target="#addClientModal"
       >
-       <FaUser/> Add New 
+        <FaUser /> Add New
       </button>
 
       {/* Modal */}
@@ -48,7 +63,7 @@ const handleSubmit = (e) => {
           <div className="modal-content">
             <div className="modal-header">
               <h1 className="modal-title fs-5" id="addClientModalLabel">
-                Add New Client <FaUser/>
+                Add New Client <FaUser />
               </h1>
               <button
                 type="button"
@@ -58,8 +73,7 @@ const handleSubmit = (e) => {
               ></button>
             </div>
             <div className="modal-body">
-               
-                <form onSubmit={handleSubmit}>
+              <form onSubmit={handleSubmit}>
                 <div className="mb-3">
                   <label htmlFor="name" className="form-label">
                     Name
@@ -69,8 +83,8 @@ const handleSubmit = (e) => {
                     className="form-control"
                     id="name"
                     placeholder="Enter client's name"
-                    value= {name}
-                    onChange={handleNameChange}
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
                   />
                 </div>
                 <div className="mb-3">
@@ -83,7 +97,7 @@ const handleSubmit = (e) => {
                     id="email"
                     placeholder="Enter client's email"
                     value={email}
-                    onChange={handleEmailChange}
+                    onChange={(e) => setEmail(e.target.value)}
                   />
                 </div>
                 <div className="mb-3">
@@ -96,7 +110,7 @@ const handleSubmit = (e) => {
                     id="phone"
                     placeholder="Enter client's phone number"
                     value={phone}
-                    onChange={handlePhoneChange}
+                    onChange={(e) => setPhone(e.target.value)}
                   />
                 </div>
                 <div className="modal-footer">
@@ -107,14 +121,16 @@ const handleSubmit = (e) => {
                   >
                     Close
                   </button>
-                  <button type="submit" className="btn btn-primary">
+                  <button
+                    type="submit"
+                    className="btn btn-primary"
+                    data-bs-dismiss="modal"
+                  >
                     Save
                   </button>
                 </div>
               </form>
-
             </div>
-           
           </div>
         </div>
       </div>

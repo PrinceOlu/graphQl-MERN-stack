@@ -27,12 +27,12 @@ const {
   const ProjectStatusEnum = new GraphQLEnumType({
     name: "ProjectStatus",
     values: {
-      NEW: { value: "Not Started" },
-      IN_PROGRESS: { value: "In Progress" },
-      COMPLETED: { value: "Completed" },
+      NEW: { value: "NEW" }, // Represents "Not Started" in client UI
+      IN_PROGRESS: { value: "IN_PROGRESS" }, // Represents "In Progress" in client UI
+      COMPLETED: { value: "COMPLETED" }, // Represents "Completed" in client UI
     },
-    defaultValue: "Not Started"
   });
+  
   
   // Project Type
   const ProjectType = new GraphQLObjectType({
@@ -129,6 +129,7 @@ const {
           clientId: { type: GraphQLNonNull(GraphQLID) },
         },
         async resolve(parent, args) {
+          console.log("Received args for addProject:", args); // Log the input data
           try {
             const project = new Project({
               name: args.name,
@@ -138,10 +139,12 @@ const {
             });
             return await project.save();
           } catch (error) {
+            console.error("Error saving project:", error); // Log the error
             throw new Error("Error adding project: " + error.message);
           }
         },
       },
+      
 
       // delete Project
       deleteProject: {

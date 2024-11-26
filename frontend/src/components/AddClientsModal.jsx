@@ -48,7 +48,7 @@ function AddClientsModal() {
         data-bs-toggle="modal"
         data-bs-target="#addClientModal"
       >
-        <FaUser /> Add New
+        <FaUser /> Add Client
       </button>
 
       {/* Modal */}

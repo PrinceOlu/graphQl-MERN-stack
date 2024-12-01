@@ -2,36 +2,44 @@ import { useMutation } from "@apollo/client";
 import { useState } from "react";
 import { FaEdit } from "react-icons/fa";
 import { GET_PROJECTS } from "../queries/projectQueries";
-import { UPDATE_PROJECT } from "../mutations/projectMutations"; // You'll need to define this mutation
+import { UPDATE_PROJECT } from "../mutations/projectMutations";
 
 function EditProjectForm({ project }) {
-  // Set up state to manage form inputs
   const [name, setName] = useState(project.name);
-  const [description, setDescription] = useState(project.description);
+  const [description, setDescription] = useState(project.description || '');
   const [status, setStatus] = useState(project.status);
 
-  // Mutation for updating project
-  const [updateProject] = useMutation(UPDATE_PROJECT, {
-    variables: { id: project.id, name, description, status },
-    refetchQueries: [{ query: GET_PROJECTS }],
-    onCompleted: () => alert('Project updated successfully!'), // Optionally show a success message
+  const [updateProject, { loading, error }] = useMutation(UPDATE_PROJECT, {
+    refetchQueries: [{ query: GET_PROJECTS }], // Refetch the projects after updating
+    onCompleted: () => alert("Project updated successfully!"),
+    onError: (err) => console.error("Error updating project:", err),
   });
 
-  // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!name || !description || !status) {
-      alert("Please fill in all fields");
+
+    // Validate required fields
+    if (!name || !status) {
+      alert("Please fill in all required fields");
       return;
     }
-    updateProject(); // Trigger the mutation
+
+    updateProject({
+      variables: {
+        id: project.id,
+        name,
+        description, // Description is optional
+        status,
+      },
+    }).catch((err) => {
+      console.error("Mutation error:", err);
+    });
   };
 
   return (
     <div className="mt-5">
       <h3>Update Project Details</h3>
       <form onSubmit={handleSubmit}>
-        {/* Project Name */}
         <div className="mb-3">
           <label htmlFor="name" className="form-label">
             Project Name
@@ -43,10 +51,10 @@ function EditProjectForm({ project }) {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Enter project name"
+            disabled={loading}
           />
         </div>
 
-        {/* Description */}
         <div className="mb-3">
           <label htmlFor="description" className="form-label">
             Description
@@ -57,10 +65,10 @@ function EditProjectForm({ project }) {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Enter project description"
+            disabled={loading}
           />
         </div>
 
-        {/* Status */}
         <div className="mb-3">
           <label htmlFor="status" className="form-label">
             Status
@@ -70,6 +78,7 @@ function EditProjectForm({ project }) {
             id="status"
             value={status}
             onChange={(e) => setStatus(e.target.value)}
+            disabled={loading}
           >
             <option value="NEW">Not Started</option>
             <option value="IN_PROGRESS">In Progress</option>
@@ -77,11 +86,12 @@ function EditProjectForm({ project }) {
           </select>
         </div>
 
-        {/* Submit Button */}
-        <button type="submit" className="btn btn-primary">
+        <button type="submit" className="btn btn-primary" disabled={loading}>
           <FaEdit className="me-2" />
-          Update Project
+          {loading ? "Updating..." : "Update Project"}
         </button>
+
+        {error && <p className="text-danger mt-2">Error: {error.message}</p>}
       </form>
     </div>
   );

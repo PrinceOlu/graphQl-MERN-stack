@@ -55,7 +55,7 @@ function Project() {
               <strong>Phone:</strong> {client.phone}
             </li>
           </ul>
-          <EditProjectForm projectId={id}/>
+          <EditProjectForm project={data.project} />
           <DeleteProjectButton projectId={id}/>
         </div>
       )}

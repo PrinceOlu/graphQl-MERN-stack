@@ -17,7 +17,7 @@ const projectsSchema = new mongoose.Schema({
   clientId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "ClientsSchema", // Correct reference to the client schema
-    required: true, // Ensures that every project is linked to a client
+    required: false, // Ensures that every project is linked to a client
   },
 });
 
